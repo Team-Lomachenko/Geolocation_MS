@@ -1,10 +1,12 @@
 package com.example.geolocation;
 
+import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
 
 @Table
 public class DriverGeolocation {
 
+    @PrimaryKey
     private String driverUsername;
     private String geolocation;
 

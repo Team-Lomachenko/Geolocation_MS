@@ -1,33 +1,36 @@
 package com.example.geolocation.consumer;
 
 import com.example.geolocation.*;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
+
 @Component
 public class KafkaConsumer {
-    //private PassengerGeolocationRepository passengerGeolocationRepository;
-    //private DriverGeolocationRepository driverGeolocationRepository;
+    private PassengerGeolocationRepository passengerGeolocationRepository;
+    private DriverGeolocationRepository driverGeolocationRepository;
 
-    /*public KafkaConsumer(PassengerGeolocationRepository passengerGeolocationRepository, DriverGeolocationRepository driverGeolocationRepository) {
+    public KafkaConsumer(PassengerGeolocationRepository passengerGeolocationRepository, DriverGeolocationRepository driverGeolocationRepository) {
         this.passengerGeolocationRepository = passengerGeolocationRepository;
         this.driverGeolocationRepository = driverGeolocationRepository;
-    }*/
+    }
 
-    @KafkaListener(topics = {"passenger_geolocation", "test"}, groupId = "group_id")
-    public void consume(ConsumerRecord<String, KafkaMessage> record) {
-        String topic = record.topic();
-        KafkaMessage message = record.value();
-        String username = message.getUsername();
-        String geolocation = message.getGeolocation();
-        System.out.println("Received message from " + topic + ": " + username + geolocation);
-        if (record.topic().equals("passenger_geolocation")) {
-            PassengerGeolocation passengerGeolocation = new PassengerGeolocation(username, geolocation);
-            //passengerGeolocationRepository.save(passengerGeolocation);
-        } else {
-            DriverGeolocation driverGeolocation = new DriverGeolocation(username, geolocation);
-            //driverGeolocationRepository.save(driverGeolocation);
-        }
+    @KafkaListener(topics = "passenger_geolocation", groupId = "group_id")
+    public void consumePassenger(HashMap<String, String> message) {
+        String username = message.get("username");
+        String geolocation = message.get("geolocation");
+        System.out.println("Received message from: " + username + geolocation);
+        PassengerGeolocation passengerGeolocation = new PassengerGeolocation(username, geolocation);
+        passengerGeolocationRepository.save(passengerGeolocation);
+    }
+
+    @KafkaListener(topics = "driver_geolocation", groupId = "group_id")
+    public void consumeDriver(HashMap<String, String> message) {
+        String username = message.get("username");
+        String geolocation = message.get("geolocation");
+        System.out.println("Received message from: " + username + geolocation);
+        DriverGeolocation driverGeolocation = new DriverGeolocation(username, geolocation);
+        driverGeolocationRepository.save(driverGeolocation);
     }
 }
