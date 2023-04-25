@@ -20,17 +20,25 @@ public class KafkaConsumer {
     }
 
     @KafkaListener(topics = "passenger_geolocation", groupId = "group_id")
-    public void consumePassenger(HashMap<String, String> message) {
+    public void consumePassenger(String consumerMessage) {
+        HashMap<String, String> message;
+        ObjectMapper mapper = new ObjectMapper();
+        TypeReference<HashMap<String, String>> typeRef = new TypeReference<HashMap<String, String>>() {};
+        try {
+            message = mapper.readValue(consumerMessage, typeRef);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         String username = message.get("username");
         String geolocation = message.get("geolocation");
-        System.out.println("Received message from: " + username + geolocation);
+        System.out.println("Received message from: " + username + " " + geolocation);
         PassengerGeolocation passengerGeolocation = new PassengerGeolocation(username, geolocation);
         passengerGeolocationRepository.save(passengerGeolocation);
     }
 
     @KafkaListener(topics = "test", groupId = "group_id")
     public void consumeDriver(String consumerMessage) {
-        HashMap<String, String> message = new HashMap<>();
+        HashMap<String, String> message;
         ObjectMapper mapper = new ObjectMapper();
         TypeReference<HashMap<String, String>> typeRef = new TypeReference<HashMap<String, String>>() {};
         try {
